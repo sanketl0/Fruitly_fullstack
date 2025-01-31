@@ -1,0 +1,23 @@
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Shadow effect for cards */
+.shadow-sm {
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover effect for cards */
+.card:hover {
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.container-fluid {
+  background: #f7f8fc;
+}
+
+.card-body {
+  padding: 1.5rem;
+}

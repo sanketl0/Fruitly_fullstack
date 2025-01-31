@@ -1,0 +1,188 @@
+
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #0000003b;"> <!-- Added sticky-top -->
+  <div class="container-fluid">
+    <!-- Navbar Brand with Logo -->
+    <a class="navbar-brand" href="#">
+      <img src="assets/Fruitly_Agro.png" alt="Fruitly Agro" class="img-fluid" style="max-height: 50px;">
+    </a>
+
+    <!-- Navbar toggle button hidden on small screens, logout button shown -->
+    <button class="navbar-toggler d-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Logout button for mobile view -->
+    <div class="d-block d-lg-none ms-auto">
+      <button (click)="logout()" class="btn btn-dark">Logout</button>
+    </div>
+
+    <!-- Navbar items on large screens -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <button (click)="logout()" class="btn btn-dark">Logout</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  
+
+
+  <div class="container-fluid">
+    <ul class="nav nav-tabs mt-2" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link active"
+          id="balance-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#balance"
+          type="button"
+          role="tab"
+          aria-controls="balance"
+          aria-selected="true"
+        >
+          Balance
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          id="statement-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#statement"
+          type="button"
+          role="tab"
+          aria-controls="statement"
+          aria-selected="false"
+        >
+          Statement
+        </button>
+      </li>
+    </ul>
+  
+    <!-- Tabs Content -->
+    <div class="tab-content" id="myTabContent">
+      <!-- Balance Tab -->
+      <div class="tab-pane fade show active" id="balance" role="tabpanel" aria-labelledby="balance-tab">
+        <div class="mt-4">
+          <h2>Balance Information</h2>
+          <ul class="navbar-nav me-auto mb-2">
+            <li class="nav-item">
+              <button (click)="getBalance()" class="btn btn-dark">Fetch Balance</button>
+            </li>
+          </ul> 
+      
+          <div *ngIf="balanceData; else balanceErrorTemplate">
+            <div class="card shadow-lg mb-2 rounded-lg" style="background-color: #ffffff;">
+              <div class="card-body p-4">
+                <!-- Bank Logo (Centered Above Balance) -->
+                <div class="text-center mb-2">
+                  <img src="assets/ICICI Bank_id_NFCjbgj_1.png" alt="ICICI Bank Logo" class="img-fluid" style="max-height: 40px;">
+                </div>
+                <!-- Balance Title -->
+                <h5 class="text-center fw-bold mb-1">Balance:</h5>
+                <!-- Balance Amount -->
+                <h5 class="card-title text-center text-primary fw-bold">{{ balanceData.EFFECTIVEBAL }}</h5>
+                <!-- Date and Time -->
+                <div class="d-flex justify-content-between">
+                  <p class="card-text"><strong>Date:</strong> {{ dateAndTime.date }}</p>
+                  <p class="card-text"><strong>Time:</strong> {{ dateAndTime.time }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ng-template #balanceErrorTemplate>
+            <div class="alert alert-danger" [innerHTML]="errorMessage"></div>
+          </ng-template>
+        </div>
+      </div>
+      
+  
+      <!-- Statement Tab -->
+      <div class="tab-pane fade" id="statement" role="tabpanel" aria-labelledby="statement-tab">
+        <div class="container-fluid">
+          <!-- Horizontal Tabs Navigation -->
+          <ul class="nav nav-pills mb-3 justify-content-center" id="statementTab" role="tablist">
+            <!-- <li class="nav-item">
+              <a class="nav-link active" id="allstatement-tab" data-bs-toggle="pill" href="#allstatement" role="tab" aria-controls="allstatement" aria-selected="true">All Statements</a>
+            </li> -->
+            <!-- <li class="nav-item">
+              <a class="nav-link active" id="testGetBetweenDates-tab" data-bs-toggle="pill" href="#testGetBetweenDates" role="tab" aria-controls="testGetBetweenDates" aria-selected="false">Gets Between Dates</a>
+            </li> -->
+          </ul>
+          
+          <!-- Tabs Content -->
+          <div class="tab-content" id="statementTabContent">
+            <!-- Get Between Dates Tab Content -->
+            <div class="tab-pane fade show active" id="testGetBetweenDates" role="tabpanel" aria-labelledby="testGetBetweenDates-tab">
+              <!-- Heading -->
+              <h2 class="text-center mb-4">GET Statement Between Dates</h2>
+          
+              <!-- Date Range Buttons -->
+              <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+                <button (click)="fetchStatement('past7Days')" class="btn btn-outline-dark">Past 7 Days</button>
+                <button (click)="fetchStatement('past5Days')" class="btn btn-outline-primary">Past 5 Days</button>
+                <button (click)="fetchStatement('last2Days')" class="btn btn-outline-primary">Last 2 Days</button>
+                <button (click)="fetchStatement('yesterday')" class="btn btn-outline-primary">Yesterday</button>
+                <button (click)="fetchStatement('today')" class="btn btn-outline-primary">Today</button>
+              </div>
+          
+              <!-- Date Inputs and Button -->
+              <div class="row justify-content-center mb-4">
+                <div class="col-12 col-md-5 col-lg-2 mb-3 mb-md-0">
+                  <label for="fromDate" class="form-label">From Date:</label>
+                  <input id="fromDate" type="date" [(ngModel)]="getfromDate" class="form-control">
+                </div>
+                <div class="col-12 col-md-5 col-lg-2 mb-3 mb-md-0">
+                  <label for="toDate" class="form-label">To Date:</label>
+                  <input id="toDate" type="date" [(ngModel)]="gettoDate" class="form-control">
+                </div>
+                <div class="col-12 col-md-2 col-lg-1 text-center">
+                  <button (click)="getDatesBetween(getfromDate, gettoDate)" class="btn btn-dark w-100 mt-md-4">Get Data</button>
+                </div>
+              </div>
+          
+              <!-- Download Excel Button -->
+              <div class="text-center mb-3">
+                <button (click)="exportToExcel()" class="btn btn-primary">Download Data</button>
+              </div>
+          
+              <!-- Table -->
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped w-100">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>TRANSACTION ID</th>
+                      <th>Amount</th>
+                      <th>Type</th>
+                      <th>Date</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of customstatementData">
+                      <td>{{ item.TRANSACTIONID }}</td>
+                      <td>{{ item.AMOUNT }}</td>
+                      <td>{{ item.TYPE }}</td>
+                      <td>{{ item.VALUEDATE }}</td>
+                      <td>{{ item.REMARKS }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+      
+      
+      
+      
+    </div>
+
+  
+  

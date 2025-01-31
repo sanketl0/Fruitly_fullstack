@@ -1,0 +1,156 @@
+<!-- <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg p-4" style="width: 400px; border-radius: 10px;">
+      <ul class="nav nav-tabs" id="authTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="register-tab" data-bs-toggle="tab" href="#register" role="tab" aria-controls="register" aria-selected="true">Register</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="false">Login</a>
+        </li>
+      </ul>
+      
+      <div class="tab-content mt-3" id="authTabContent">
+        <div class="tab-pane fade show active" id="register" role="tabpanel" aria-labelledby="register-tab">
+          <h2 class="text-center">Register</h2>
+          <form (ngSubmit)="register()">
+            <div class="mb-3">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstName" [(ngModel)]="firstName" name="firstName" required />
+            </div>
+            <div class="mb-3">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastName" [(ngModel)]="lastName" name="lastName" required />
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" [(ngModel)]="email" name="email" required />
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" [(ngModel)]="password" name="password" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+          </form>
+        </div>
+        
+        <div class="tab-pane fade" id="login" role="tabpanel" aria-labelledby="login-tab">
+            <h2 class="text-center">Login</h2>
+            <form (ngSubmit)="login()">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" [(ngModel)]="email" name="email" required />
+              </div>
+              <button type="submit" class="btn btn-primary w-100" [disabled]="isOtpSent">Send OTP</button>
+            </form>
+        
+            <div *ngIf="isOtpSent">
+              <div class="mb-3">
+                <label for="otp" class="form-label">Enter OTP</label>
+                <input type="text" class="form-control" id="otp" [(ngModel)]="otp" name="otp" required />
+              </div>
+              <button type="button" class="btn btn-success w-100" (click)="verifyOtp()" [disabled]="isOtpVerified">Verify OTP</button>
+            </div>
+                    <div *ngIf="isOtpVerified">
+              <button type="submit" class="btn btn-primary w-100">Login</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  
+
+  <div class="container-fluid">
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+      <!-- Role Selection Card -->
+      <div *ngIf="!roleSelected" class="card p-4" style="border-radius: 15px; background-color: #f8f9fa; width: 500px; margin: 0 auto;">
+        <div class="text-center">
+          <h2 style="font-weight: 700;">Choose Your Role</h2>
+          <div class="row gx-4 gy-4 mt-1 justify-content-center">
+            <!-- User 1 Card -->
+            <div class="col-12 col-md-6">
+              <div class="card p-3 rounded-lg shadow-sm hover-shadow-lg" style="cursor: pointer; transition: transform 0.3s ease;" (click)="selectRole('user1')">
+                <div class="card-body text-center">
+                  <i class="bi bi-person-circle display-1 text-primary"></i>
+                  <h5 class="card-title mt-3" style="font-weight: 600;">Manager</h5>
+                </div>
+              </div>
+            </div>
+  
+            <!-- User 2 Card -->
+            <div class="col-12 col-md-6">
+              <div class="card p-3 rounded-lg shadow-sm hover-shadow-lg" style="cursor: pointer; transition: transform 0.3s ease;" (click)="selectRole('user2')">
+                <div class="card-body text-center">
+                  <i class="bi bi-people-fill display-1 text-success"></i>
+                  <h5 class="card-title mt-3" style="font-weight: 600;">Operator</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Registration and Login Forms Card -->
+      <div *ngIf="roleSelected" class="card p-4 " style="border-radius: 15px; background-color: #f8f9fa; width: 350px; margin: 0 auto;">
+        <!-- Tabs for Register and Login Forms -->
+        <ul class="nav nav-tabs" id="authTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="register-tab" data-bs-toggle="tab" href="#register" role="tab" aria-controls="register" aria-selected="false">Register</a>
+          </li>
+          <li class="nav-item active" role="presentation">
+            <a class="nav-link" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">Login</a>
+          </li>
+        </ul>
+  
+        <div class="tab-content mt-3" id="authTabContent">
+          <!-- Register Form -->
+          <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+            <!-- <h2 class="text-center mb-4" style="font-weight: 700;">Register as {{ selectedRole }}</h2> -->
+            <form (ngSubmit)="register()">
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" [(ngModel)]="firstName" name="firstName" required placeholder="Enter your first name" />
+              </div>
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" [(ngModel)]="lastName" name="lastName" required placeholder="Enter your last name" />
+              </div>
+              <div class="mb-3">
+                <label for="mobile_number" class="form-label">Mobile number</label>
+                <input type="number" class="form-control" id="mobile_number" [(ngModel)]="mobile_number" name="mobile_number" required placeholder="Enter your mobile_number" />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" [(ngModel)]="password" name="password" required placeholder="Enter your password" />
+              </div>
+              <button type="submit" class="btn btn-primary w-100 py-2" style="font-weight: 600;">Register</button>
+            </form>
+            <!-- Back Button to Select Role -->
+            <button class="btn btn-secondary w-100 mt-3 py-2" (click)="goBack()">Back to Role Selection</button>
+          </div>
+        
+          <!-- Login Form -->
+          <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+            <h2 class="text-center mb-4" style="font-weight: 700;">Login</h2>
+            <form>
+              <div class="mb-3">
+                <label for="mobile_number" class="form-label">mobile_number</label>
+                <input type="number" class="form-control" id="mobile_number" [(ngModel)]="mobile_number" name="mobile_number" required placeholder="Enter your mobile_number" />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" [(ngModel)]="password" name="password" required placeholder="Enter your password" />
+              </div>
+              <button type="submit" class="btn btn-primary w-100 py-2" (click)="login()">Login</button>
+            </form>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+  

@@ -1,0 +1,11 @@
+*.pyc
+
+env/
+.idea/
+.idea
+__pycache__/
+**/__pycache__
+
+Apache24/
+
+

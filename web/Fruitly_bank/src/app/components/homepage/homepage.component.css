@@ -1,0 +1,40 @@
+.card {
+    background-color: #f9f9f9;  /* Light background color for the card */
+    border: none;  /* No border for a cleaner look */
+  }
+  
+  .card-body {
+    padding: 20px;  /* Sufficient padding inside the card */
+  }
+  
+  .card-title {
+    font-size: 1.8rem;  /* Larger and bold card title */
+    color: #007bff;  /* Make the balance text stand out with blue */
+    margin-bottom: 20px;  /* Margin for space below the title */
+  }
+  
+  .card-text {
+    font-size: 1.1rem;  /* Slightly larger text for better readability */
+    color: #444;  /* Soft text color */
+  }
+  
+  .card-text strong {
+    color: #333;  /* Darker color for the strong labels */
+  }
+  
+  .d-flex {
+    margin-bottom: 10px;  /* Margin between flex rows */
+  }
+  
+  .fw-bold {
+    font-weight: bold;
+  }
+  
+  .shadow-lg {
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);  /* Larger shadow for more depth */
+  }
+  
+  .rounded-lg {
+    border-radius: 15px;  /* Rounded corners for a soft, modern look */
+  }
+  
