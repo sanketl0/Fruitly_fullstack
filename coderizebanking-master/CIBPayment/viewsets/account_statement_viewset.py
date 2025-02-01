@@ -15,13 +15,13 @@ from CIBPayment.serializers import AccountStatementSerializer, AccountStatementU
 import BankAPI
 from Logger import logger
 from BankAPI.post_data_config import PostData
-from accounts.permission import IsUser1OrUser2
+from accounts.permission import IsUser1OrUser2, IsUser2OneMonthRange
 
 
 class AccountStatementViewSet(viewsets.ViewSet):
     
     authentication_classes = [TokenAuthentication]  
-    permission_classes = [IsAuthenticated,IsUser1OrUser2]
+    permission_classes = [IsAuthenticated,IsUser1OrUser2,IsUser2OneMonthRange]
     
     @action(detail=False, url_path='fetch-all-records')
     def fetch_all_records(self, request):
@@ -179,8 +179,85 @@ class AccountStatementViewSet(viewsets.ViewSet):
             except Exception as e:
                 return Response({"error": str(e)}, status=500)
     
-    
+    @action(detail=False, methods=['get'], url_path='fetch-todays-records/(?P<from_date>[^\.]+)/(?P<to_date>[^\.]+)')
+    def fetch_todays_records(self, request, from_date, to_date):
+        """
+        Fetch today's account statement records. Returns both new records from the Bank API 
+        and the existing records in the database.
+        """
+        # Ensure the dates are in the correct format (YYYY-MM-DD)
+        try:
+            from_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            to_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            print(f"Received from_date: {from_date}, to_date: {to_date}")
+        except ValueError:
+            return Response({"error": "Invalid date format. Please use YYYY-MM-DD."}, status=400)
 
+        # Search for existing records in the database for today's date
+        queryset = AccountStatement.objects.filter(VALUEDATE__range=[from_date, to_date])
+
+        # If records are found in the database, serialize them
+        if queryset.exists():
+            existing_data = AccountStatementSerializer(queryset, many=True).data
+        else:
+            existing_data = []
+
+        # If no records found in the database, fetch from the Bank API
+        tenant_name = request.tenant.name
+        print(f"Tenant Name: {tenant_name}")
+
+        post_data = PostData(client_name=tenant_name)
+        post_data = post_data.get_for_account_statement(from_date=from_date.strftime('%d-%m-%Y'),
+                                                        to_date=to_date.strftime('%d-%m-%Y'))
+
+        try:
+            # Initialize the Bank API class and send the API request
+            api = BankAPI.AccountStatementAPI(data=post_data)
+            response = api.call()
+
+            if response.status_code == 200:
+                # Decrypt the API response
+                decrypted_response = api.decrypt_response_data(method='Hybrid')
+                records = decrypted_response.get('Record', [])
+
+                new_data = []
+                if records:
+                    # Fetch existing TRANSACTIONIDs from DB to avoid duplicates
+                    existing_transaction_ids = set(AccountStatement.objects.values_list('TRANSACTIONID', flat=True))
+
+                    # Filter out records that already exist
+                    new_records = [
+                        AccountStatement(
+                            ACCOUNTNO=record.get('ACCOUNTNO', ''),
+                            TXNDATE=datetime.strptime(record.get('TXNDATE'), '%d-%m-%Y %H:%M:%S'),
+                            REMARKS=record.get('REMARKS', ''),
+                            AMOUNT=float(record.get('AMOUNT', '0').replace(',', '')),
+                            BALANCE=float(record.get('BALANCE', '0').replace(',', '')),
+                            VALUEDATE=datetime.strptime(record.get('VALUEDATE'), '%d-%m-%Y').date(),
+                            TYPE=record.get('TYPE', ''),
+                            TRANSACTIONID=record.get('TRANSACTIONID', ''),
+                            reconciliation_status='PENDING'
+                        ) for record in records if record.get('TRANSACTIONID', '') not in existing_transaction_ids
+                    ]
+
+                    # Bulk insert only new records into the database
+                    if new_records:
+                        AccountStatement.objects.bulk_create(new_records)
+                        new_data = AccountStatementSerializer(new_records, many=True).data
+                        print(f"✅ Successfully stored {len(new_records)} new records in the database.")
+
+                # Combine both new and existing records
+                all_data = existing_data + new_data
+                if all_data:
+                    return Response({"message": "Fetched from Bank API and stored in the database.", "data": all_data})
+                else:
+                    return Response({"message": "No new records found. All records already exist in the database."})
+
+            else:
+                return Response({"error": "Failed to fetch data from Bank API"}, status=500)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 
     @action(detail=False, url_path=r'CreditOnly/BetweenDates/(?P<from_date>[^\.]+)/(?P<to_date>[^\.]+)')

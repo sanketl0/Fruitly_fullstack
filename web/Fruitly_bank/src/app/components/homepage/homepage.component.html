@@ -34,7 +34,7 @@
     <ul class="nav nav-tabs mt-2" id="myTab" role="tablist">
       <li class="nav-item" role="presentation">
         <button
-          class="nav-link active"
+          class="nav-link active fw-bold"
           id="balance-tab"
           data-bs-toggle="tab"
           data-bs-target="#balance"
@@ -43,12 +43,12 @@
           aria-controls="balance"
           aria-selected="true"
         >
-          Balance
+          <i class="fas fa-wallet me-2"></i> Balance
         </button>
       </li>
       <li class="nav-item" role="presentation">
         <button
-          class="nav-link"
+          class="nav-link fw-bold"
           id="statement-tab"
           data-bs-toggle="tab"
           data-bs-target="#statement"
@@ -57,7 +57,7 @@
           aria-controls="statement"
           aria-selected="false"
         >
-          Statement
+          <i class="fas fa-file-alt me-2"></i> Statement
         </button>
       </li>
     </ul>
@@ -70,10 +70,19 @@
           <h2>Balance Information</h2>
           <ul class="navbar-nav me-auto mb-2">
             <li class="nav-item">
-              <button (click)="getBalance()" class="btn btn-dark">Fetch Balance</button>
+              <button (click)="getBalance()" class="btn btn-dark">Refresh</button>&nbsp;
+              <button (click)="getAccountStatement()" class="btn btn-dark">updates statement db</button>
             </li>
           </ul> 
-      
+          <!-- Full-Screen Loader -->
+          <div *ngIf="loading" class="full-screen-loader">
+            <div>
+              <div class="loader-spinner"></div>
+              <div class="loading-text">Loading...</div>
+            </div>
+          </div>
+
+
           <div *ngIf="balanceData; else balanceErrorTemplate">
             <div class="card shadow-lg mb-2 rounded-lg" style="background-color: #ffffff;">
               <div class="card-body p-4">
@@ -118,15 +127,15 @@
             <!-- Get Between Dates Tab Content -->
             <div class="tab-pane fade show active" id="testGetBetweenDates" role="tabpanel" aria-labelledby="testGetBetweenDates-tab">
               <!-- Heading -->
-              <h2 class="text-center mb-4">GET Statement Between Dates</h2>
+              <h2 class="text-center mb-4 fs-4 fs-md-3">GET Statement Between Dates</h2>
           
               <!-- Date Range Buttons -->
-              <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
-                <button (click)="fetchStatement('past7Days')" class="btn btn-outline-dark">Past 7 Days</button>
-                <button (click)="fetchStatement('past5Days')" class="btn btn-outline-primary">Past 5 Days</button>
-                <button (click)="fetchStatement('last2Days')" class="btn btn-outline-primary">Last 2 Days</button>
-                <button (click)="fetchStatement('yesterday')" class="btn btn-outline-primary">Yesterday</button>
-                <button (click)="fetchStatement('today')" class="btn btn-outline-primary">Today</button>
+              <div class="d-flex flex-column flex-md-row justify-content-center gap-2 mb-4">
+                <button (click)="fetchStatement('past7Days')" class="btn btn-outline-dark w-100 w-md-auto">Past 7 Days</button>
+                <button (click)="fetchStatement('past5Days')" class="btn btn-outline-primary w-100 w-md-auto">Past 5 Days</button>
+                <button (click)="fetchStatement('last2Days')" class="btn btn-outline-primary w-100 w-md-auto">Last 2 Days</button>
+                <button (click)="fetchStatement('yesterday')" class="btn btn-outline-primary w-100 w-md-auto">Yesterday</button>
+                <button (click)="fetchStatement('today')" class="btn btn-outline-primary w-100 w-md-auto">Today</button>
               </div>
           
               <!-- Date Inputs and Button -->
@@ -140,49 +149,81 @@
                   <input id="toDate" type="date" [(ngModel)]="gettoDate" class="form-control">
                 </div>
                 <div class="col-12 col-md-2 col-lg-1 text-center">
-                  <button (click)="getDatesBetween(getfromDate, gettoDate)" class="btn btn-dark w-100 mt-md-4">Get Data</button>
+                  <button (click)="getDatesBetween(getfromDate, gettoDate)" class="btn btn-dark w-100 mt-3 mt-md-4">Get Data</button>
                 </div>
               </div>
           
               <!-- Download Excel Button -->
               <div class="text-center mb-3">
-                <button (click)="exportToExcel()" class="btn btn-primary">Download Data</button>
+                <button (click)="exportToExcel()" class="btn btn-primary w-20 w-md-auto">Download Data</button>
               </div>
-          
-              <!-- Table -->
-              <div class="table-responsive">
-                <table class="table table-bordered table-striped w-100">
-                  <thead class="table-dark">
-                    <tr>
-                      <th>TRANSACTION ID</th>
-                      <th>Amount</th>
-                      <th>Type</th>
-                      <th>Date</th>
-                      <th>Remarks</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let item of customstatementData">
-                      <td>{{ item.TRANSACTIONID }}</td>
-                      <td>{{ item.AMOUNT }}</td>
-                      <td>{{ item.TYPE }}</td>
-                      <td>{{ item.VALUEDATE }}</td>
-                      <td>{{ item.REMARKS }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                  <tr>
+                    <th (click)="sortData('srNo')">
+                      Sr.no
+                      <i *ngIf="sortColumn === 'srNo'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
+                      <i *ngIf="sortColumn !== 'srNo'" class="fa-solid fa-arrow-up"></i>
+                    </th>
+                    <th (click)="sortData('dateTime')">
+                      Date & Time
+                      <i *ngIf="sortColumn === 'dateTime'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
+                      <i *ngIf="sortColumn !== 'dateTime'" class="fa-solid fa-arrow-up"></i>
+                    </th>
+                    <th (click)="sortData('TRANSACTIONID')">
+                      TRANSACTION ID
+                      <i *ngIf="sortColumn === 'TRANSACTIONID'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
+                      <i *ngIf="sortColumn !== 'TRANSACTIONID'" class="fa-solid fa-arrow-up"></i>
+                    </th>
+                    <th (click)="sortData('REMARKS')">
+                      Remarks
+                      <i *ngIf="sortColumn === 'REMARKS'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
+                      <i *ngIf="sortColumn !== 'REMARKS'" class="fa-solid fa-arrow-up"></i>
+                    </th>
+                    <th (click)="sortData('Deposit (CR)')">
+                      Deposit (CR)
+                      <i *ngIf="sortColumn === 'Deposit (CR)'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
+                      <i *ngIf="sortColumn !== 'Deposit (CR)'" class="fa-solid fa-arrow-up"></i>
+                    </th>
+                    <th (click)="sortData('Withdrawal (DR)')">
+                      Withdrawal (DR)
+                      <i *ngIf="sortColumn === 'Withdrawal (DR)'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
+                      <i *ngIf="sortColumn !== 'Withdrawal (DR)'" class="fa-solid fa-arrow-up"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Total Row (First Row) -->
+                  <tr class=" font-weight-bold">
+                    <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                    <td><strong><span style="background-color: lightgreen;">₹{{ totalDeposit }}</span></strong></td>
+                    <td><strong><span style="background-color: orangered;">₹{{ totalWithdrawal }}</span></strong></td>
+                  </tr>
+                  
+                  <!-- Data Rows -->
+                  <tr *ngFor="let item of customstatementData; let i = index">
+                    <td style="font-size: 12px;">{{ item.srNo }}</td>
+                    <td style="font-size: 12px;">{{ item.dateOnly }} {{ item.timeOnly }}</td>
+                    <td style="font-size: 12px;">{{ item.TRANSACTIONID }}</td>
+                    <td style="font-size: 12px;">{{ item.REMARKS }}</td>
+                    <td style="font-size: 12px;">
+                      <span *ngIf="item.TYPE === 'CR'" style="background-color: lightgreen;">₹{{ item.AMOUNT }}</span>
+                      <span *ngIf="item.TYPE !== 'CR'">-</span>
+                    </td>
+                    <td style="font-size: 12px;">
+                      <span *ngIf="item.TYPE === 'DR'" style="background-color: orangered;">₹{{ item.AMOUNT }}</span>
+                      <span *ngIf="item.TYPE !== 'DR'">-</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              
             </div>
           </div>
         </div>
         
       </div>
-      
-      
-      
-      
-      
     </div>
-
+  </div>
   
   

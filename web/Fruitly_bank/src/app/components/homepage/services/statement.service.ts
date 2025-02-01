@@ -38,8 +38,15 @@ export class StatementService {
     );
   }
 
+  gettodaysstament(fromDate: string, toDate: string): Observable<any>{
+    return this.http.get(
+      `${this.envirnment}CIBPayment/AccountStatement/fetch-todays-records/${fromDate}/${toDate}/`
+    );
+  }
+
   // Update Statement
   updateStatement(data: any): Observable<any> {
     return this.http.post(`${this.envirnment}CIBPayment/AccountStatement/UpdateStatement/`, data);
   }
+  
 }
