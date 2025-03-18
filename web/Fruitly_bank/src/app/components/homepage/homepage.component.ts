@@ -27,12 +27,16 @@ export class HomepageComponent implements OnInit {
   totalDeposit: any;
   totalWithdrawal: any;
   loading: boolean = false;
+  userRoles: string = ''; // Store user role
 
-
+ 
   constructor(private api: HomeapiService,private router: Router,private stamentapi :StatementService,private authService: UserApiService) {}
 
   ngOnInit(): void {
+    this.userRoles = this.getUserRole(); // Get user role from localStorage
+
     const userRole = this.getUserRole(); // Get user role
+
     this.getAccountStatement();
     this.getBalance(); 
     if (userRole !== 'user2') {
@@ -164,6 +168,27 @@ export class HomepageComponent implements OnInit {
   }
   
 
+  updateTransactionType(item: any): void {
+    if (!item.TRANSACTIONID) {
+      console.error("Invalid transaction ID.");
+      return;
+    }
+
+    const newTransactionType = prompt("Enter new transaction type (fruitly/other):", item.transaction_type || 'fruitly');
+    if (newTransactionType !== null && newTransactionType.trim() !== '') {
+      item.transaction_type = newTransactionType; // Update UI instantly
+
+      this.api.updateTransactionType(item.TRANSACTIONID, newTransactionType).subscribe(
+        response => {
+          console.log("✅ Transaction type updated successfully!", response);
+        },
+        error => {
+          console.error("❌ Error updating transaction type", error);
+          alert("Failed to update transaction type.");
+        }
+      );
+    }
+  }
   
   
 

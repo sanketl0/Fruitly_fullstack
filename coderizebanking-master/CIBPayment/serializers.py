@@ -7,6 +7,26 @@ class AccountStatementSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountStatement
         fields = '__all__'
+        read_only_fields = ['transaction_type']  
+        
+    def to_representation(self, instance):
+        """Customize the response based on user role."""
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+
+        if request and request.user.role != 'user1':
+            data.pop('transaction_type', None) 
+
+        return data
+
+    def validate(self, data):
+        """Restrict modification of 'transaction_type' to only user1."""
+        request = self.context.get('request')
+
+        if request and request.user.role != 'user1' and 'transaction_type' in data:
+            raise serializers.ValidationError({"transaction_type": "You are not allowed to modify this field."})
+
+        return data
         
 
 

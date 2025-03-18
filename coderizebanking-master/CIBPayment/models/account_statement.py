@@ -5,6 +5,10 @@ from .object_log import ObjectLog
 
 
 class AccountStatement(ObjectLog, models.Model):
+    TRANSACTION_CHOICES = [
+        ('fruitly', 'Fruitly'),
+        ('other', 'Other'),
+    ]
     id = models.AutoField(primary_key=True)
 
     # Fields in response but not with each transaction
@@ -18,6 +22,11 @@ class AccountStatement(ObjectLog, models.Model):
     VALUEDATE = models.DateField()
     TYPE = models.CharField(max_length=50)
     TRANSACTIONID = models.CharField(max_length=50)
+    transaction_type = models.CharField(
+        max_length=10,
+        choices=TRANSACTION_CHOICES,
+        default='fruitly'
+    )
 
     # Reconciliation
     reconciliation_status = models.CharField(max_length=50, default='PENDING')

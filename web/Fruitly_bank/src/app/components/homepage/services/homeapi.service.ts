@@ -9,6 +9,7 @@ import { environment } from 'src/Envirnment/envirnment';
 export class HomeapiService {
 
   envirnment =environment.apiUrl
+  baseurl =environment.apiUrl
   constructor(private http: HttpClient) {}
 
   fetchBalance(): Observable<any> {
@@ -28,14 +29,26 @@ export class HomeapiService {
     observe: 'response'
   }).pipe(
     tap(response => {
-      console.log('API Response:', response); // Logs the complete response object
+      console.log('API Response:', response); 
     }),
     catchError(error => {
-      console.error('API Error:', error); // Logs the error if the request fails
+      console.error('API Error:', error); 
       return throwError(error);
     })
   );
 }
+
+  // updateTransactionType(transactionId: string, transactionType: string): Observable<any> {
+  //   return this.http.patch(`${this.baseurl}CIBPayment/AccountStatement/update-transaction-type/${transactionId}/`, {
+  //     transaction_type: transactionType
+  //   });
+  // }
+
+  updateTransactionType(transactionId: string, transactionType: string): Observable<any> {
+    return this.http.patch(`${this.baseurl}CIBPayment/AccountStatement/${transactionId}/update-transaction-type/`, {
+      transaction_type: transactionType
+    });
+  }
 
 
 

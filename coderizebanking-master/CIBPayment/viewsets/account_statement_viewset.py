@@ -23,6 +23,8 @@ class AccountStatementViewSet(viewsets.ViewSet):
     authentication_classes = [TokenAuthentication]  
     permission_classes = [IsAuthenticated,IsUser1OrUser2,IsUser2OneMonthRange]
     
+    
+    
     @action(detail=False, url_path='fetch-all-records')
     def fetch_all_records(self, request):
         """
@@ -94,8 +96,40 @@ class AccountStatementViewSet(viewsets.ViewSet):
             print("🚨 Error:", str(e))
             return Response({"error": str(e)}, status=500)
    
- 
-   
+    def get_serializer_context(self):
+            """Pass request context to serializer"""
+            return {"request": self.request}
+        
+    @action(detail=True, methods=['patch'], url_path='update-transaction-type')
+    def update_transaction_type(self, request, pk=None):
+        """
+        Allows only user1 to update the transaction_type field.
+        """
+        try:
+            # Fetch the object manually
+            instance = AccountStatement.objects.filter(TRANSACTIONID=pk).first()
+
+            # If instance not found, return error
+            if not instance:
+                return Response({"error": "Transaction not found."}, status=404)
+
+            # Check if user is 'user1'
+            if request.user.role != 'user1':
+                return Response({"error": "You are not allowed to modify this field."}, status=403)
+
+            # Validate transaction_type input
+            transaction_type = request.data.get('transaction_type')
+            if not transaction_type:
+                return Response({"error": "Transaction type is required."}, status=400)
+
+            # Update and save
+            instance.transaction_type = transaction_type
+            instance.save()
+
+            return Response({"message": "Transaction type updated successfully."}, status=200)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
    
     @action(detail=False, methods=['get'], url_path='fetch-custom-records/(?P<from_date>[^\.]+)/(?P<to_date>[^\.]+)')
     def fetch_custom_records(self, request, from_date, to_date):

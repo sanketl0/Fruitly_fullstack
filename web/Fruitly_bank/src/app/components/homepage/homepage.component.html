@@ -190,14 +190,17 @@
                       <i *ngIf="sortColumn === 'Withdrawal (DR)'" class="fa-solid" [ngClass]="{'fa-arrow-up': sortDirection === 'asc', 'fa-arrow-down': sortDirection === 'desc'}"></i>
                       <i *ngIf="sortColumn !== 'Withdrawal (DR)'" class="fa-solid fa-arrow-up"></i>
                     </th>
+                    <th *ngIf="userRoles === 'user1'">Transaction Type</th>
+                    <th *ngIf="userRoles === 'user1'">Actions</th> 
+
                   </tr>
                 </thead>
                 <tbody>
                   <!-- Total Row (First Row) -->
                   <tr class=" font-weight-bold">
                     <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                    <td><strong><span style="background-color: lightgreen;">₹{{ totalDeposit }}</span></strong></td>
-                    <td><strong><span style="background-color: orangered;">₹{{ totalWithdrawal }}</span></strong></td>
+                    <td><strong><span >₹{{ totalDeposit }}</span></strong></td>
+                    <td><strong><span>₹{{ totalWithdrawal }}</span></strong></td>
                   </tr>
                   
                   <!-- Data Rows -->
@@ -207,12 +210,20 @@
                     <td style="font-size: 12px;">{{ item.TRANSACTIONID }}</td>
                     <td style="font-size: 12px;">{{ item.REMARKS }}</td>
                     <td style="font-size: 12px;">
-                      <span *ngIf="item.TYPE === 'CR'" style="background-color: lightgreen;">₹{{ item.AMOUNT }}</span>
+                      <span *ngIf="item.TYPE === 'CR'" >₹{{ item.AMOUNT }}</span>
                       <span *ngIf="item.TYPE !== 'CR'">-</span>
                     </td>
                     <td style="font-size: 12px;">
-                      <span *ngIf="item.TYPE === 'DR'" style="background-color: orangered;">₹{{ item.AMOUNT }}</span>
+                      <span *ngIf="item.TYPE === 'DR'" >₹{{ item.AMOUNT }}</span>
                       <span *ngIf="item.TYPE !== 'DR'">-</span>
+                    </td>
+                    <td style="font-size: 12px;" *ngIf="userRoles === 'user1'" style="font-size: 12px;">
+                      {{ item.transaction_type || 'Fruitly' }}
+                    </td>                   
+                    <td *ngIf="userRoles === 'user1'">
+                      <button (click)="updateTransactionType(item)" class="btn btn-sm btn-primary">
+                        Update
+                      </button>
                     </td>
                   </tr>
                 </tbody>
